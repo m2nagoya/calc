@@ -18,54 +18,113 @@ class ViewController: UIViewController {
     var previousNumber: Double = 0
     var performingMath = false
     var operation = 0
+    var array: [String] = []
     
-    @IBOutlet weak var label: UILabel!
+    @IBOutlet weak var label1: UILabel!
     
     @IBAction func number(_ sender: UIButton) {
-        if performingMath == true {
-            label.text = String(sender.tag)
-            numberOnScreen = Double(label.text!)!
-            performingMath = false
-        } else {
-            label.text = label.text! + String(sender.tag)
-            numberOnScreen = Double(label.text!)!
+        if label1.text != "Error" {
+            if performingMath == true {
+                label1.text = String(sender.tag)
+                numberOnScreen = Double(label1.text!)!
+                performingMath = false
+            } else {
+                label1.text = label1.text! + String(sender.tag)
+                numberOnScreen = Double(label1.text!)!
+            }
         }
         audioPlayerInstance1.currentTime = 0
         audioPlayerInstance1.play()
     }
     
-    @IBAction func button(_ sender: UIButton) {
-        if label.text != "" && sender.tag != 11 && sender.tag != 16 && !performingMath {
-            previousNumber = Double(label.text!)!
-            if sender.tag == 12 {
-                label.text = "+"
-            } else if sender.tag == 13 {
-                label.text = "-"
-            } else if sender.tag == 14 {
-                label.text = "×"
-            } else if sender.tag == 15 {
-                label.text = "÷"
+    func culc() {
+        if operation == 12 {
+            if (previousNumber + numberOnScreen) == Double(Int(previousNumber + numberOnScreen)) {
+                label1.text = String(Int(previousNumber + numberOnScreen))
+            } else {
+                label1.text = String(previousNumber + numberOnScreen)
             }
-            operation = sender.tag
-            performingMath = true;
+        } else if operation == 13 {
+            if (previousNumber - numberOnScreen) == Double(Int(previousNumber - numberOnScreen)) {
+                label1.text = String(Int(previousNumber - numberOnScreen))
+            } else {
+                label1.text = String(previousNumber - numberOnScreen)
+            }
+        } else if operation == 14 {
+            if (previousNumber * numberOnScreen) == Double(Int(previousNumber * numberOnScreen)) {
+                label1.text = String(Int(previousNumber * numberOnScreen))
+            } else {
+                label1.text = String(previousNumber * numberOnScreen)
+            }
+        } else if operation == 15 {
+            if (numberOnScreen != 0) {
+                if (previousNumber / numberOnScreen) == Double(Int(previousNumber / numberOnScreen)) {
+                    label1.text = String(Int(previousNumber / numberOnScreen))
+                } else {
+                    label1.text = String(previousNumber / numberOnScreen)
+                }
+            } else {
+                label1.text = "Error";
+            }
+        }
+    }
+    
+    @IBAction func button(_ sender: UIButton) {
+        // 関数ボタン(+,-,×,÷)が押された時
+        if label1.text != "" && sender.tag != 11 && sender.tag != 16 {
+            if !performingMath && label1.text != "Error" {
+                if operation == 0 {
+                    previousNumber = Double(label1.text!)!
+                    if sender.tag == 12 {
+                        label1.text = "+"
+                    } else if sender.tag == 13 {
+                        label1.text = "-"
+                    } else if sender.tag == 14 {
+                        label1.text = "×"
+                    } else if sender.tag == 15 {
+                        label1.text = "÷"
+                    }
+                    operation = sender.tag
+                    performingMath = true;
+                } else {
+                    culc(); // 計算
+                    previousNumber = Double(label1.text!)!
+                    numberOnScreen = 0;
+                    operation = 0;
+                    if sender.tag == 12 {
+                        label1.text = "+"
+                    } else if sender.tag == 13 {
+                        label1.text = "-"
+                    } else if sender.tag == 14 {
+                        label1.text = "×"
+                    } else if sender.tag == 15 {
+                        label1.text = "÷"
+                    }
+                    operation = sender.tag
+                    performingMath = true;
+                }
+            }
             audioPlayerInstance2.currentTime = 0
             audioPlayerInstance2.play()
-        // 四則演算を実行
+        // 演算を実行(=)
         } else if sender.tag == 16 {
-            if operation == 12 {
-                label.text = String(previousNumber + numberOnScreen)
-            } else if operation == 13 {
-                label.text = String(previousNumber - numberOnScreen)
-            } else if operation == 14 {
-                label.text = String(previousNumber * numberOnScreen)
-            } else if operation == 15 {
-                label.text = String(previousNumber / numberOnScreen)
+            if label1.text != "Error" && label1.text != "" {
+                culc(); // 計算
+                if label1.text != "Error" {
+//                    if label1.text != array[0] {
+//                        array.insert(label1.text!,at: 0);
+//                    }
+                    previousNumber = Double(label1.text!)!
+                }
             }
+            numberOnScreen = 0;
+            operation = 0;
             audioPlayerInstance3.currentTime = 0
             audioPlayerInstance3.play()
         // クリアー
         } else if sender.tag == 11 {
-            label.text = ""
+            label1.text = ""
+            array.removeAll();
             previousNumber = 0;
             numberOnScreen = 0;
             operation = 0;
@@ -77,7 +136,6 @@ class ViewController: UIViewController {
     // 初期化
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         let soundFilePath1 = Bundle.main.path(forResource: "button", ofType: "mp3")!
         let soundFilePath2 = Bundle.main.path(forResource: "calc",   ofType: "mp3")!
         let soundFilePath3 = Bundle.main.path(forResource: "equal",  ofType: "mp3")!
@@ -103,7 +161,7 @@ class ViewController: UIViewController {
     // シェイクでクリアー
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
         if event?.subtype == UIEvent.EventSubtype.motionShake{
-            label.text = ""
+            label1.text = ""
             previousNumber = 0;
             numberOnScreen = 0;
             operation = 0;
